@@ -3,17 +3,12 @@ package com.ojasaar.fairshareapi.domain.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.ojasaar.fairshareapi.util.IdGenerator;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data // Equivalent to @Getter @Setter @RequiredArgsConstructor @ToString @EqualsAndHashCode.
-@NoArgsConstructor
-@Builder
-@AllArgsConstructor
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
 @Entity
-@Table(name = "GROUPS")
+@Table(name = "GROUPS") // consider renaming to "groups" to avoid quoting/case issues
 public class Group {
     @Id
     @Column(name = "group_id", unique = true, updatable = false, length = 6)
@@ -24,7 +19,7 @@ public class Group {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
-    private User user;
+    private User owner;
 
     @PrePersist
     public void addId() {
