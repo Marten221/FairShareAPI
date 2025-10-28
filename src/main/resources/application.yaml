@@ -28,3 +28,6 @@ logging:
     org:
       springframework:
         security: TRACE
+
+server:
+  port: 8081

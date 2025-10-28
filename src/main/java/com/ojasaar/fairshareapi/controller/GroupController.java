@@ -1,14 +1,14 @@
 package com.ojasaar.fairshareapi.controller;
 
 import com.ojasaar.fairshareapi.domain.model.Group;
+import com.ojasaar.fairshareapi.dto.AddMemberRequest;
+import com.ojasaar.fairshareapi.dto.GroupDTO;
 import com.ojasaar.fairshareapi.service.GroupService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,7 +21,16 @@ public class GroupController {
     }
 
     @GetMapping("/groups")
-    public Set<Group> getGroups() {
+    public List<GroupDTO> getGroups() {
         return groupService.getGroups();
     }
+
+    @PostMapping("/group/{groupId}/member")
+    public ResponseEntity<Void> addMemberToGroup(
+            @PathVariable String groupId,
+            @RequestBody AddMemberRequest request) {
+        groupService.addMemberToGroup(groupId, request.userId());
+        return ResponseEntity.ok().build();
+    }
+
 }

@@ -1,10 +1,12 @@
 package com.ojasaar.fairshareapi.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ojasaar.fairshareapi.util.IdGenerator;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter @Setter
@@ -23,7 +25,11 @@ public class User {
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private Set<Group> groups;
+    private Set<Group> ownerGroups= new HashSet<>();
+
+    @ManyToMany(mappedBy = "members")
+    @JsonIgnore
+    private Set<Group> memberGroups = new HashSet<>();
 
     // Generate the id right before persisting to db
     @PrePersist
