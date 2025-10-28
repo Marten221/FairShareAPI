@@ -13,11 +13,14 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-    private final SecretKey SECRET_KEY;
-    private final long EXPIRATION_TIME = 1000L * 60 * 60;//Long.parseLong(Dotenv.load().get("JWT_EXPIRATION_TIME"));
+    private final boolean production; // Set to true in production. Makes it send the cookie over https
+    private final SecretKey secretKey;
+    private final long EXPIRATION_TIME = 1000L * 60 * 60;
 
-    public JwtUtil(@Value("${jwt.secret}") String secret) {
-        this.SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes());
+    public JwtUtil(@Value("${production}") boolean production,
+                   @Value("${jwt.secret}") String secret) {
+        this.production = production;
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     public ResponseCookie generateCookie(String userId) {
@@ -25,7 +28,7 @@ public class JwtUtil {
 
         return ResponseCookie.from("ACCESS_TOKEN", token)
                 .httpOnly(true)
-                .secure(false)
+                .secure(production)
                 .path("/")
                 .sameSite("Lax")
                 .maxAge(EXPIRATION_TIME / 1000)
@@ -42,7 +45,7 @@ public class JwtUtil {
                 .subject(userId)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SECRET_KEY)
+                .signWith(secretKey)
                 .compact();
     }
 
@@ -54,7 +57,7 @@ public class JwtUtil {
     public String validate(String token) {
         try {
             return Jwts.parser()
-                    .verifyWith(SECRET_KEY)
+                    .verifyWith(secretKey)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload()

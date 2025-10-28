@@ -3,8 +3,10 @@ package com.ojasaar.fairshareapi.config;
 import com.ojasaar.fairshareapi.exception.InvalidCredentialsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +26,20 @@ public class GlobalExceptionHandler {
         return createErrorResponseEntity(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "An unexpected error occurred");
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<?> handleNoHandlerFoundException(NoHandlerFoundException e) {
+        return createErrorResponseEntity(
+                HttpStatus.NOT_FOUND,
+                "Endpoint not found: " + e.getRequestURL());
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<?> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+        return createErrorResponseEntity(
+                HttpStatus.METHOD_NOT_ALLOWED,
+                "Method " + e.getMethod() + " not allowed for this endpoint");
     }
 
     public ResponseEntity<?> createErrorResponseEntity(HttpStatus httpStatus, String errorMessage) {
