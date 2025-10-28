@@ -60,15 +60,7 @@ GET /groups
 
 #### Add Member to Group
 ```
-POST /group/{groupId}/member
+POST /group/{groupId}
 ```
-
-**Request Body:**
-```json
-{
-  "userId": ""
-}
-```
-
 **Path Parameters:**
 - `groupId` - The ID of the group to add the member to
