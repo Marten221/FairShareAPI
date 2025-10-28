@@ -48,7 +48,9 @@ public class GroupService {
     }
 
     @Transactional
-    public void addMemberToGroup(String groupId, String userId) {
+    public void addMemberToGroup(String groupId) {
+        String userId = UserUtil.getUserIdfromContext();
+
         Group group = groupRepo.findById(groupId)
                 .orElseThrow(() -> new NotFoundException("Group not found"));
         User user = userRepo.findById(userId)
