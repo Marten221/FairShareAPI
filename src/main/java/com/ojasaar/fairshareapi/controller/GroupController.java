@@ -1,7 +1,6 @@
 package com.ojasaar.fairshareapi.controller;
 
 import com.ojasaar.fairshareapi.domain.model.Group;
-import com.ojasaar.fairshareapi.dto.AddMemberRequest;
 import com.ojasaar.fairshareapi.dto.GroupDTO;
 import com.ojasaar.fairshareapi.service.GroupService;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +24,10 @@ public class GroupController {
         return groupService.getGroups();
     }
 
-    @PostMapping("/group/{groupId}/member")
-    public ResponseEntity<Void> addMemberToGroup(
-            @PathVariable String groupId,
-            @RequestBody AddMemberRequest request) {
-        groupService.addMemberToGroup(groupId, request.userId());
+    @PostMapping("/group/{groupId}")
+    public ResponseEntity<Void> joinGroup(
+            @PathVariable String groupId) {
+        groupService.addMemberToGroup(groupId);
         return ResponseEntity.ok().build();
     }
 
