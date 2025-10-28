@@ -2,6 +2,11 @@
 
 A project for the course **Mobile Application Development**
 
+This api can be accessed from 
+```
+https://ojasaar.com/fairshareapi
+```
+
 ## Available Endpoints
 
 ### User Endpoints
