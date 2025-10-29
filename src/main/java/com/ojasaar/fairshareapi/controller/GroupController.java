@@ -15,20 +15,23 @@ public class GroupController {
     private final GroupService groupService;
 
     @PostMapping("/group")
-    public Group createGroup(@RequestBody Group group) {
-        return groupService.createGroup(group);
+    public ResponseEntity<Group> createGroup(@RequestBody Group group) {
+        return ResponseEntity.ok(groupService.createGroup(group));
     }
 
     @GetMapping("/groups")
-    public List<GroupDTO> getGroups() {
-        return groupService.getGroups();
+    public ResponseEntity<List<GroupDTO>> getGroups() {
+        return ResponseEntity.ok(groupService.getGroups());
+    }
+
+    @GetMapping("/group/{groupId}")
+    public ResponseEntity<GroupDTO> getGroupById(@PathVariable String groupId) {
+        return ResponseEntity.ok(groupService.getGroupById(groupId));
     }
 
     @PostMapping("/group/{groupId}")
-    public ResponseEntity<Void> joinGroup(
-            @PathVariable String groupId) {
+    public ResponseEntity<Void> joinGroup(@PathVariable String groupId) {
         groupService.addMemberToGroup(groupId);
         return ResponseEntity.ok().build();
     }
-
 }

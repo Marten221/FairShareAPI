@@ -25,7 +25,7 @@ public class User {
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private Set<Group> ownerGroups= new HashSet<>();
+    private Set<Group> ownerGroups = new HashSet<>();
 
     @ManyToMany(mappedBy = "members")
     @JsonIgnore

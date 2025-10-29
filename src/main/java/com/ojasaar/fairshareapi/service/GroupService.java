@@ -8,12 +8,13 @@ import com.ojasaar.fairshareapi.exception.NotFoundException;
 import com.ojasaar.fairshareapi.repository.GroupRepo;
 import com.ojasaar.fairshareapi.repository.UserRepo;
 import com.ojasaar.fairshareapi.util.UserUtil;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +35,8 @@ public class GroupService {
     public List<GroupDTO> getGroups() {
         String userId = UserUtil.getUserIdfromContext();
 
-        Set<Group> groups = groupRepo.findAllByOwner_Id(userId);
+        List<Group> groups = groupRepo.findAllByOwnerOrMember(userId);
+
         return groups.stream()
                 .map(g -> new GroupDTO(
                         g.getId(),
@@ -60,5 +62,32 @@ public class GroupService {
         user.getMemberGroups().add(group);
 
         groupRepo.save(group);
+    }
+
+    public GroupDTO getGroupById(String groupId) {
+        String userId = UserUtil.getUserIdfromContext();
+
+        if (!hasAccessToGroup(userId, groupId)) {
+            throw new AuthorizationDeniedException("You don't have access to this group");
+        }
+
+        Group group = groupRepo.findGroupById(groupId); // todo: Make mappers
+        return new GroupDTO(
+                group.getId(),
+                group.getName(),
+                new UserDTO(group.getOwner().getId(), group.getOwner().getEmail()),
+                group.getMembers().stream()
+                        .map(m -> new UserDTO(m.getId(), m.getEmail()))
+                        .collect(Collectors.toSet())
+        );
+    }
+
+    private boolean hasAccessToGroup(String userId, String groupId) {
+        Group group = groupRepo.findById(groupId)
+                .orElseThrow(() -> new EntityNotFoundException("Group not found"));
+
+        return group.getOwner().getId().equals(userId) ||
+                group.getMembers().stream()
+                        .anyMatch(member -> member.getId().equals(userId));
     }
 }
