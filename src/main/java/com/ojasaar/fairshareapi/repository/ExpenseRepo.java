@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface ExpenseRepo extends JpaRepository<Expense, String> {
 
-    List<Expense> getAllByGroup(Group group);
+    List<Expense> getAllByGroupOrderByTimestampDesc(Group group);
 }

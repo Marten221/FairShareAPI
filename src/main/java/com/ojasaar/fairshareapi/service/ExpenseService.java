@@ -55,7 +55,7 @@ public class ExpenseService {
             throw new AuthorizationDeniedException("You don't have access to this group");
         }
 
-        List<Expense> expenses = expenseRepo.getAllByGroup(group);
+        List<Expense> expenses = expenseRepo.getAllByGroupOrderByTimestampDesc(group);
         return expenseMapper.toExpenseDtoSet(expenses);
     }
 }
