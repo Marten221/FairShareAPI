@@ -20,6 +20,7 @@ public class ExpenseMapper {
         return new ExpenseDto(expense.getId(),
                 expense.getDescription(),
                 expense.getAmount(),
+                expense.getTimestamp(),
                 userMapper.toDto(expense.getOwner()));
     }
 

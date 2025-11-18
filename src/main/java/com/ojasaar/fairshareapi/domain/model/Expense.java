@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,6 +27,8 @@ public class Expense {
     private String description;
 
     private double amount;
+
+    private LocalDateTime timestamp;
 
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.ojasaar.fairshareapi.util.UserUtil.hasAccessToGroup;
@@ -36,7 +37,8 @@ public class ExpenseService {
 
         Expense newExpense = Expense.builder()
                 .description(expense.description())
-                .amount(expense.amount())
+                .amount((double) Math.round(expense.amount() * 100) / 100)
+                .timestamp(LocalDateTime.now())
                 .group(group)
                 .owner(owner)
                 .build();
