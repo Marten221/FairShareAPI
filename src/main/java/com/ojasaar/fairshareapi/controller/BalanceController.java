@@ -25,4 +25,15 @@ public class BalanceController {
     public ResponseEntity<List<UserBalanceDTO>> getGroupBalances(@PathVariable String groupId) {
         return ResponseEntity.ok(balanceService.getGroupUserBalances(groupId));
     }
+
+    @GetMapping("/userbalance/{groupId}")
+    public ResponseEntity<UserBalanceDTO> getUserBalance(@PathVariable String groupId) {
+        return ResponseEntity.ok(balanceService.getUserBalance(groupId));
+    }
+
+    @GetMapping("/userdebts/{groupId}")
+    public ResponseEntity<List<DebtDTO>> getUserDebt(@PathVariable String groupId) {
+        return ResponseEntity.ok(balanceService.getUserDebts(groupId));
+    }
+
 }

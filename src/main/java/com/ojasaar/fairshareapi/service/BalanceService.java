@@ -6,6 +6,7 @@ import com.ojasaar.fairshareapi.domain.model.User;
 import com.ojasaar.fairshareapi.dto.DebtDTO;
 import com.ojasaar.fairshareapi.dto.UserBalanceDTO;
 import com.ojasaar.fairshareapi.repository.GroupRepo;
+import com.ojasaar.fairshareapi.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,27 @@ public class BalanceService {
     public List<UserBalanceDTO> getGroupUserBalances(String groupId) {
         Group group = groupRepo.findGroupById(groupId);
         return userBalances(group);
+    }
+
+    public UserBalanceDTO getUserBalance(String groupId) {
+        Group group = groupRepo.findGroupById(groupId);
+        String userId = UserUtil.getUserIdfromContext();
+
+        return userBalances(group).stream()
+                .filter(b -> b.userId().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "User " + userId + " is not part of group " + groupId
+                ));
+    }
+
+    public List<DebtDTO> getUserDebts(String groupId) {
+        Group group = groupRepo.findGroupById(groupId);
+        String userId = UserUtil.getUserIdfromContext();
+
+        return netDebtsForGroup(group).stream()
+                .filter(d -> d.fromUserId().equals(userId) || d.toUserId().equals(userId))
+                .toList();
     }
 
     public Map<String, Map<String, Double>> buildRawDebts(Group group) {
@@ -136,8 +158,8 @@ public class BalanceService {
             String userId = entry.getKey();
             User u = entry.getValue();
 
-            double totalOwes = owes.getOrDefault(userId, 0.0);
-            double totalIsOwed = isOwed.getOrDefault(userId, 0.0);
+            double totalOwes = (double) Math.round(owes.getOrDefault(userId, 0.0) * 100) / 100;
+            double totalIsOwed = (double) Math.round(isOwed.getOrDefault(userId, 0.0) * 100) / 100;
             double net = totalIsOwed - totalOwes;
 
             balances.add(new UserBalanceDTO(
@@ -151,5 +173,6 @@ public class BalanceService {
 
         return balances;
     }
+
 
 }
