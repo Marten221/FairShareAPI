@@ -5,6 +5,7 @@ import com.ojasaar.fairshareapi.domain.model.Group;
 import com.ojasaar.fairshareapi.domain.model.User;
 import com.ojasaar.fairshareapi.dto.DebtDTO;
 import com.ojasaar.fairshareapi.dto.UserBalanceDTO;
+import com.ojasaar.fairshareapi.dto.UserDebtsDTO;
 import com.ojasaar.fairshareapi.repository.GroupRepo;
 import com.ojasaar.fairshareapi.util.UserUtil;
 import lombok.RequiredArgsConstructor;
@@ -39,13 +40,26 @@ public class BalanceService {
                 ));
     }
 
-    public List<DebtDTO> getUserDebts(String groupId) {
+    public UserDebtsDTO getUserDebts(String groupId) {
         Group group = groupRepo.findGroupById(groupId);
         String userId = UserUtil.getUserIdfromContext();
 
-        return netDebtsForGroup(group).stream()
-                .filter(d -> d.fromUserId().equals(userId) || d.toUserId().equals(userId))
-                .toList();
+        List<DebtDTO> allDebts = netDebtsForGroup(group);
+
+        List<DebtDTO> owe = new ArrayList<>();
+        List<DebtDTO> owed = new ArrayList<>();
+
+        for (DebtDTO d : allDebts) {
+            if (d.fromUserId().equals(userId)) {
+                // I owe someone
+                owe.add(d);
+            } else if (d.toUserId().equals(userId)) {
+                // Someone owes me
+                owed.add(d);
+            }
+        }
+
+        return new UserDebtsDTO(owe, owed);
     }
 
     public Map<String, Map<String, Double>> buildRawDebts(Group group) {

@@ -2,6 +2,7 @@ package com.ojasaar.fairshareapi.controller;
 
 import com.ojasaar.fairshareapi.dto.DebtDTO;
 import com.ojasaar.fairshareapi.dto.UserBalanceDTO;
+import com.ojasaar.fairshareapi.dto.UserDebtsDTO;
 import com.ojasaar.fairshareapi.service.BalanceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +33,7 @@ public class BalanceController {
     }
 
     @GetMapping("/userdebts/{groupId}")
-    public ResponseEntity<List<DebtDTO>> getUserDebt(@PathVariable String groupId) {
+    public ResponseEntity<UserDebtsDTO> getUserDebt(@PathVariable String groupId) {
         return ResponseEntity.ok(balanceService.getUserDebts(groupId));
     }
 
