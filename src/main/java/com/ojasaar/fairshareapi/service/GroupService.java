@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.ojasaar.fairshareapi.util.UserUtil.hasAccessToGroup;
+
 @Service
 @RequiredArgsConstructor
 public class GroupService {
@@ -59,21 +61,14 @@ public class GroupService {
 
     public GroupDTO getGroupById(String groupId) {
         String userId = UserUtil.getUserIdfromContext();
-
-        if (!hasAccessToGroup(userId, groupId)) {
-            throw new AuthorizationDeniedException("You don't have access to this group");
-        }
-
-        Group group = groupRepo.findGroupById(groupId);
-        return groupMapper.toGroupDto(group);
-    }
-
-    private boolean hasAccessToGroup(String userId, String groupId) {
         Group group = groupRepo.findById(groupId)
                 .orElseThrow(() -> new EntityNotFoundException("Group not found"));
 
-        return group.getOwner().getId().equals(userId) ||
-                group.getMembers().stream()
-                        .anyMatch(member -> member.getId().equals(userId));
+        if (!hasAccessToGroup(userId, group)) {
+            throw new AuthorizationDeniedException("You don't have access to this group");
+        }
+
+        return groupMapper.toGroupDto(group);
     }
+
 }

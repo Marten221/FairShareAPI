@@ -10,9 +10,12 @@ import com.ojasaar.fairshareapi.repository.GroupRepo;
 import com.ojasaar.fairshareapi.repository.UserRepo;
 import com.ojasaar.fairshareapi.util.UserUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static com.ojasaar.fairshareapi.util.UserUtil.hasAccessToGroup;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +26,13 @@ public class ExpenseService {
     private final ExpenseMapper expenseMapper;
 
     public ExpenseDto createExpense(ExpenseDto expense, String groupId) {
-        User owner =  userRepo.getReferenceById(UserUtil.getUserIdfromContext());
+        String ownerId = UserUtil.getUserIdfromContext();
+        User owner =  userRepo.getReferenceById(ownerId);
         Group group = groupRepo.getReferenceById(groupId);
+
+        if (!hasAccessToGroup(ownerId, group)) {
+            throw new AuthorizationDeniedException("You don't have access to this group");
+        }
 
         Expense newExpense = Expense.builder()
                 .description(expense.description())
@@ -38,7 +46,13 @@ public class ExpenseService {
     }
 
     public List<ExpenseDto> getGroupExpenses(String groupId) {
+        String ownerId = UserUtil.getUserIdfromContext();
         Group group = groupRepo.getReferenceById(groupId);
+
+        if (!hasAccessToGroup(ownerId, group)) {
+            throw new AuthorizationDeniedException("You don't have access to this group");
+        }
+
         List<Expense> expenses = expenseRepo.getAllByGroup(group);
         return expenseMapper.toExpenseDtoSet(expenses);
     }
