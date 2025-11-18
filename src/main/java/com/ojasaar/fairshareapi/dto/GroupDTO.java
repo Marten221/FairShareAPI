@@ -1,5 +1,6 @@
 package com.ojasaar.fairshareapi.dto;
 
+
 import java.util.Set;
 
 public record GroupDTO(
