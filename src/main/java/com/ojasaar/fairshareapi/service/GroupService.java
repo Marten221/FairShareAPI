@@ -3,8 +3,8 @@ package com.ojasaar.fairshareapi.service;
 import com.ojasaar.fairshareapi.domain.model.Group;
 import com.ojasaar.fairshareapi.domain.model.User;
 import com.ojasaar.fairshareapi.dto.GroupDTO;
-import com.ojasaar.fairshareapi.dto.UserDTO;
 import com.ojasaar.fairshareapi.exception.NotFoundException;
+import com.ojasaar.fairshareapi.mapper.GroupMapper;
 import com.ojasaar.fairshareapi.repository.GroupRepo;
 import com.ojasaar.fairshareapi.repository.UserRepo;
 import com.ojasaar.fairshareapi.util.UserUtil;
@@ -15,13 +15,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static com.ojasaar.fairshareapi.util.UserUtil.hasAccessToGroup;
 
 @Service
 @RequiredArgsConstructor
 public class GroupService {
     private final GroupRepo groupRepo;
     private final UserRepo userRepo;
+    private final GroupMapper groupMapper;
 
     public Group createGroup(Group group) {
         String userId = UserUtil.getUserIdfromContext();
@@ -38,14 +40,7 @@ public class GroupService {
         List<Group> groups = groupRepo.findAllByOwnerOrMember(userId);
 
         return groups.stream()
-                .map(g -> new GroupDTO(
-                        g.getId(),
-                        g.getName(),
-                        new UserDTO(g.getOwner().getId(), g.getOwner().getEmail()),
-                        g.getMembers().stream()
-                                .map(m -> new UserDTO(m.getId(), m.getEmail()))
-                                .collect(Collectors.toSet())
-                ))
+                .map(groupMapper::toGroupDto)
                 .toList();
     }
 
@@ -66,28 +61,14 @@ public class GroupService {
 
     public GroupDTO getGroupById(String groupId) {
         String userId = UserUtil.getUserIdfromContext();
-
-        if (!hasAccessToGroup(userId, groupId)) {
-            throw new AuthorizationDeniedException("You don't have access to this group");
-        }
-
-        Group group = groupRepo.findGroupById(groupId); // todo: Make mappers
-        return new GroupDTO(
-                group.getId(),
-                group.getName(),
-                new UserDTO(group.getOwner().getId(), group.getOwner().getEmail()),
-                group.getMembers().stream()
-                        .map(m -> new UserDTO(m.getId(), m.getEmail()))
-                        .collect(Collectors.toSet())
-        );
-    }
-
-    private boolean hasAccessToGroup(String userId, String groupId) {
         Group group = groupRepo.findById(groupId)
                 .orElseThrow(() -> new EntityNotFoundException("Group not found"));
 
-        return group.getOwner().getId().equals(userId) ||
-                group.getMembers().stream()
-                        .anyMatch(member -> member.getId().equals(userId));
+        if (!hasAccessToGroup(userId, group)) {
+            throw new AuthorizationDeniedException("You don't have access to this group");
+        }
+
+        return groupMapper.toGroupDto(group);
     }
+
 }

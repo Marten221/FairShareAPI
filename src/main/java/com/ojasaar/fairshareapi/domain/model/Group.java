@@ -2,6 +2,7 @@ package com.ojasaar.fairshareapi.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ojasaar.fairshareapi.util.IdGenerator;
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,6 +34,10 @@ public class Group {
     )
     @JsonIgnore
     private Set<User> members = new HashSet<>();
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private Set<Expense> expenses = new HashSet<>();
 
     @PrePersist
     public void addId() {
